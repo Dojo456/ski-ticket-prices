@@ -1,15 +1,13 @@
 interface Resort {
-  id: string;
-  name: string;
-  location: string;
-  logo?: string;
+	name: string;
+	location: string;
+	logo?: string;
 }
 
 interface PriceData {
-  resortId: string;
-  date: string;
-  price: number;
-  currency: string;
+	date: string;
+	price: number;
+	resortName: string;
 }
 
-export type { Resort, PriceData }; 
+export type { Resort, PriceData };

@@ -25,7 +25,7 @@
 		// Initialize Firebase
 		const app = initializeApp(firebaseConfig, 'ski-ticket-prices');
 		const analytics = getAnalytics(app);
-		db.set(getFirestore(app));
+		db.set(getFirestore(app, 'ski-ticket-prices'));
 	});
 </script>
 

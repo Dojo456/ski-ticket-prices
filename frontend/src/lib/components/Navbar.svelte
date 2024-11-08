@@ -22,7 +22,7 @@
 			</a>
 			<div class="flex items-center gap-6">
 				<a href="/" class="text-gray-600 hover:text-gray-900">Home</a>
-				<a href="/about" class="text-gray-600 hover:text-gray-900">About</a>
+				<a href="/dates" class="text-gray-600 hover:text-gray-900">Calendar</a>
 				<a href="/resorts" class="text-gray-600 hover:text-gray-900">Resorts</a>
 			</div>
 		</div>

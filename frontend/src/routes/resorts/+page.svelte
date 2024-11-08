@@ -16,14 +16,18 @@
 		});
 	});
 
-	function getAveragePrice(resortId: string) {
+	function getAveragePrice(resortName: string) {
 		if (!priceData) return 0;
 
-		const resortPrices = priceData.filter((p) => p.resortId === resortId);
+		const resortPrices = priceData.filter((p) => p.resortName === resortName);
 		const total = resortPrices.reduce((sum, p) => sum + p.price, 0);
-		return total / resortPrices.length;
+		return Math.round(total / resortPrices.length);
 	}
 </script>
+
+<svelte:head>
+	<title>Our Ski Resorts</title>
+</svelte:head>
 
 <main class="mx-auto max-w-6xl px-4 py-8">
 	<div class="mb-8">
@@ -36,8 +40,8 @@
 			{#each resorts as resort}
 				<div class="rounded-lg bg-white p-6 shadow-md">
 					<h2 class="text-2xl font-bold text-gray-900">{resort.name}</h2>
-					<p class="mt-2 text-gray-600">Average price: ${getAveragePrice(resort.id)}</p>
-					<p class="mt-2 text-gray-600">Resort ID: {resort.id}</p>
+					<p class="mt-2 text-gray-600">Average price: ${getAveragePrice(resort.name)}</p>
+					<p class="mt-2 text-gray-600">Resort ID: {resort.name}</p>
 				</div>
 			{/each}
 		{:else}

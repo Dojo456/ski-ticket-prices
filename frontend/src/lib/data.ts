@@ -9,7 +9,6 @@ export async function fetchResorts(db: Firestore): Promise<Resort[]> {
 	querySnapshot.forEach((doc) => {
 		const data = doc.data();
 		resorts.push({
-			id: data.id,
 			name: data.name,
 			location: data.location,
 			logo: data.logo
@@ -19,8 +18,8 @@ export async function fetchResorts(db: Firestore): Promise<Resort[]> {
 	return resorts;
 }
 
-export async function fetchPriceData(db: Firestore, date?: Date): Promise<PriceData[]> {
-	const pricesRef = collection(db, 'prices');
+export async function fetchPriceData(db: Firestore, date?: string): Promise<PriceData[]> {
+	const pricesRef = collection(db, 'lift_tickets');
 
 	let q;
 	if (date) {
@@ -34,10 +33,9 @@ export async function fetchPriceData(db: Firestore, date?: Date): Promise<PriceD
 	querySnapshot.forEach((doc) => {
 		const data = doc.data();
 		prices.push({
-			resortId: data.resortId,
+			resortName: data.resort_name,
 			date: data.date,
-			price: data.price,
-			currency: data.currency
+			price: data.price
 		});
 	});
 

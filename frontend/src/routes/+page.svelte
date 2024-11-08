@@ -1,22 +1,10 @@
 <script lang="ts">
-	import Calendar from '$lib/components/Calendar.svelte';
-	import { fetchResorts, fetchPriceData } from '$lib/data';
-	import { db } from '$lib/firebase.svelte';
-	import type { PriceData, Resort } from '$lib/types';
-	import { onMount } from 'svelte';
-
-	let priceData = $state<PriceData[] | null>(null);
-	let resorts = $state<Resort[] | null>(null);
-
-	onMount(() => {
-		db.subscribe(async (db) => {
-			if (db) {
-				priceData = await fetchPriceData(db);
-				resorts = await fetchResorts(db);
-			}
-		});
-	});
+	import SearchBar from '../lib/components/SearchBar.svelte';
 </script>
+
+<svelte:head>
+	<title>Lift Tickets Calendar</title>
+</svelte:head>
 
 <main class="mx-auto max-w-6xl px-4 py-8">
 	<div class="mb-8">
@@ -26,9 +14,36 @@
 		</p>
 	</div>
 
-	{#if priceData && resorts}
-		<Calendar {resorts} prices={priceData} />
-	{:else}
-		<p>Loading...</p>
-	{/if}
+	<div class="mb-8">
+		<h2 class="mb-4 text-2xl font-semibold text-gray-900">How does it work?</h2>
+		<div class="space-y-4">
+			<div class="flex items-start gap-4">
+				<span
+					class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600"
+					>1</span
+				>
+				<p class="text-gray-600">Select your desired ski dates and location</p>
+			</div>
+			<div class="flex items-start gap-4">
+				<span
+					class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600"
+					>2</span
+				>
+				<p class="text-gray-600">Compare prices from multiple resorts in the area</p>
+			</div>
+			<div class="flex items-start gap-4">
+				<span
+					class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-600"
+					>3</span
+				>
+				<p class="text-gray-600">
+					Book directly through the resort's website at the best available rate
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="mb-8">
+		<SearchBar />
+	</div>
 </main>

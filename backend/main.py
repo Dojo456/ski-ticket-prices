@@ -47,14 +47,9 @@ if __name__ == "__main__":
             ticket_id = f"{ticket.resort_name}_{ticket.date.isoformat()}"
             ticket_ref = database.tickets_collection.document(ticket_id)
 
-            # Convert date to datetime with midnight time
-            ticket_datetime = datetime.datetime.combine(
-                ticket.date, datetime.datetime.min.time()
-            )
-
             ticket_data = {
                 "resort_name": ticket.resort_name,
-                "date": ticket_datetime,  # Use datetime instead of date
+                "date": ticket.date.isoformat(),  # Use datetime instead of date
                 "price": ticket.price,
             }
 
