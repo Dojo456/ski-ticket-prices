@@ -1,41 +1,45 @@
 import type { Resort, PriceData } from './types';
+import { collection, getDocs, query, orderBy, Firestore, where } from 'firebase/firestore';
 
-export const resorts: Resort[] = [
-	{
-		id: 'vail',
-		name: 'Vail',
-		location: 'Colorado, USA',
-		logo: '/images/vail.png'
-	},
-	{
-		id: 'whistler',
-		name: 'Whistler Blackcomb',
-		location: 'British Columbia, Canada',
-		logo: '/images/whistler.png'
+export async function fetchResorts(db: Firestore): Promise<Resort[]> {
+	const resortsRef = collection(db, 'resorts');
+	const querySnapshot = await getDocs(resortsRef);
+
+	const resorts: Resort[] = [];
+	querySnapshot.forEach((doc) => {
+		const data = doc.data();
+		resorts.push({
+			id: data.id,
+			name: data.name,
+			location: data.location,
+			logo: data.logo
+		});
+	});
+
+	return resorts;
+}
+
+export async function fetchPriceData(db: Firestore, date?: Date): Promise<PriceData[]> {
+	const pricesRef = collection(db, 'prices');
+
+	let q;
+	if (date) {
+		q = query(pricesRef, orderBy('date'), where('date', '==', date));
+	} else {
+		q = query(pricesRef, orderBy('date'));
 	}
-	// Add more resorts as needed
-];
+	const querySnapshot = await getDocs(q);
 
-// Generate sample price data for the next 30 days
-const generateSamplePrices = (): PriceData[] => {
 	const prices: PriceData[] = [];
-	const today = new Date();
-
-	resorts.forEach((resort) => {
-		for (let i = 0; i < 30; i++) {
-			const date = new Date(today);
-			date.setDate(date.getDate() + i);
-
-			prices.push({
-				resortId: resort.id,
-				date: date.toISOString().split('T')[0],
-				price: Math.floor(Math.random() * (200 - 80) + 80),
-				currency: 'USD'
-			});
-		}
+	querySnapshot.forEach((doc) => {
+		const data = doc.data();
+		prices.push({
+			resortId: data.resortId,
+			date: data.date,
+			price: data.price,
+			currency: data.currency
+		});
 	});
 
 	return prices;
-};
-
-export const priceData = generateSamplePrices();
+}

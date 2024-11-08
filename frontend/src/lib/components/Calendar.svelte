@@ -113,29 +113,33 @@
 					<tr>
 						{#each week as date}
 							{@const cheapestData = getCheapestResortForDate(date)}
-							<td
-								class="h-24 w-24 border p-3 align-top {date.getMonth() !== currentDate.getMonth()
-									? 'bg-gray-50'
-									: ''}"
-							>
-								<div class="mb-1 text-sm text-gray-500">
-									{date.toLocaleDateString('en-US', {
-										month: 'short',
-										day: 'numeric'
-									})}
-								</div>
-								{#if cheapestData}
-									<div class="flex flex-col gap-1 overflow-hidden">
-										<span class="truncate font-mono text-lg">
-											{formatPrice(cheapestData.price, cheapestData.currency)}
-										</span>
-										<span class="truncate text-sm font-medium text-gray-700">
-											{cheapestData.resort?.name}
-										</span>
+							<td class="border p-0">
+								<a href="/date/{date.toISOString().split('T')[0]}">
+									<div
+										class="block h-24 p-3 align-top {date.getMonth() !== currentDate.getMonth()
+											? 'bg-gray-300'
+											: 'hover:bg-blue-50'}"
+									>
+										<div class="mb-1 text-sm text-gray-500">
+											{date.toLocaleDateString('en-US', {
+												month: 'short',
+												day: 'numeric'
+											})}
+										</div>
+										{#if cheapestData}
+											<div class="flex flex-col gap-1 overflow-hidden">
+												<span class="truncate font-mono text-lg">
+													{formatPrice(cheapestData.price, cheapestData.currency)}
+												</span>
+												<span class="truncate text-sm font-medium text-gray-700">
+													{cheapestData.resort?.name}
+												</span>
+											</div>
+										{:else}
+											<span class="text-gray-400">-</span>
+										{/if}
 									</div>
-								{:else}
-									<span class="text-gray-400">-</span>
-								{/if}
+								</a>
 							</td>
 						{/each}
 					</tr>

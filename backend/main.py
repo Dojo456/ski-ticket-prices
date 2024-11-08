@@ -1,9 +1,8 @@
 import os
 import pathlib
 from types import ModuleType
+import datetime
 
-from sqlalchemy.dialects.sqlite import insert
-from sqlalchemy.orm import Session
 
 import models
 import database
@@ -32,33 +31,42 @@ def load_resorts() -> dict[str, models.PydanticCalendar]:
 if __name__ == "__main__":
     resorts = load_resorts()
 
-    engine = database.connect()
+    # Insert resorts
+    for resort_name in resorts.keys():
+        resort_ref = database.resorts_collection.document(resort_name)
+        resort_ref.set({"name": resort_name}, merge=True)
 
-    with Session(engine) as session:
-        # Insert resorts using insert().on_conflict_do_nothing()
-        for resort in resorts.keys():
-            stmt = insert(database.Resort).values(name=resort)
-            stmt = stmt.on_conflict_do_nothing(index_elements=["name"])
+    # Insert lift tickets
+    batch = database.db.batch()
+    batch_count = 0
+    max_batch_size = 500  # Firestore batch limit
 
-            session.execute(stmt)
+    for calendar in resorts.values():
+        for ticket in calendar.dates:
+            # Create a unique ID for each ticket document
+            ticket_id = f"{ticket.resort_name}_{ticket.date.isoformat()}"
+            ticket_ref = database.tickets_collection.document(ticket_id)
 
-        session.flush()
+            # Convert date to datetime with midnight time
+            ticket_datetime = datetime.datetime.combine(
+                ticket.date, datetime.datetime.min.time()
+            )
 
-        # Insert dates using insert().on_conflict_do_nothing()
-        for calendar in resorts.values():
-            for ticket in calendar.dates:
-                orm_ticket = ticket.to_orm()
+            ticket_data = {
+                "resort_name": ticket.resort_name,
+                "date": ticket_datetime,  # Use datetime instead of date
+                "price": ticket.price,
+            }
 
-                stmt = insert(database.LiftTicket).values(
-                    resort_name=orm_ticket.resort_name,
-                    date=orm_ticket.date,
-                    price=orm_ticket.price,
-                )
-                stmt = stmt.on_conflict_do_update(
-                    index_elements=["resort_name", "date"],
-                    set_=dict(price=orm_ticket.price),
-                )
+            batch.set(ticket_ref, ticket_data, merge=True)
+            batch_count += 1
 
-                session.execute(stmt)
+            # Commit batch when it reaches the limit
+            if batch_count >= max_batch_size:
+                batch.commit()
+                batch = database.db.batch()
+                batch_count = 0
 
-        session.commit()
+    # Commit any remaining documents in the final batch
+    if batch_count > 0:
+        batch.commit()

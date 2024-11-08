@@ -1,34 +1,32 @@
 <script lang="ts">
-	import Calendar from '$lib/components/Calendar.svelte';
+	import { page } from '$app/stores';
 	import { fetchResorts, fetchPriceData } from '$lib/data';
 	import { db } from '$lib/firebase.svelte';
 	import type { PriceData, Resort } from '$lib/types';
 	import { onMount } from 'svelte';
 
+	const date = $page.params.date;
+
 	let priceData = $state<PriceData[] | null>(null);
-	let resorts = $state<Resort[] | null>(null);
 
 	onMount(() => {
 		db.subscribe(async (db) => {
 			if (db) {
 				priceData = await fetchPriceData(db);
-				resorts = await fetchResorts(db);
 			}
 		});
 	});
+
+	function formatPrice(price: number, currency: string) {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency
+		}).format(price);
+	}
 </script>
 
 <main class="mx-auto max-w-6xl px-4 py-8">
 	<div class="mb-8">
-		<h1 class="text-3xl font-bold text-gray-900">Find the Best Lift Ticket Prices</h1>
-		<p class="mt-2 text-gray-600">
-			Compare daily rates across top ski resorts and plan your perfect powder day.
-		</p>
+		<h1 class="text-3xl font-bold text-gray-900">Lift Ticket</h1>
 	</div>
-
-	{#if priceData && resorts}
-		<Calendar {resorts} prices={priceData} />
-	{:else}
-		<p>Loading...</p>
-	{/if}
 </main>
