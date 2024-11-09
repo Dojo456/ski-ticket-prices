@@ -1,21 +1,23 @@
 import os
 import pathlib
-from types import ModuleType
-import datetime
+from dotenv import load_dotenv
+from template import Template
 
+load_dotenv()
 
 import models
 import database
 
 
-def load_resorts() -> dict[str, models.PydanticCalendar]:
-    resort_modules: dict[str, ModuleType] = {}
+def load_data() -> dict[str, models.PydanticCalendar]:
+    implementations: dict[str, Template] = {}
 
-    for path in os.listdir("resorts"):
+    for path in os.listdir("implementations"):
         import importlib.util
 
         spec = importlib.util.spec_from_file_location(
-            path, pathlib.Path(__file__).parent.joinpath("resorts").joinpath(path)
+            path,
+            pathlib.Path(__file__).parent.joinpath("implementations").joinpath(path),
         )
 
         if spec and spec.loader:
@@ -23,37 +25,46 @@ def load_resorts() -> dict[str, models.PydanticCalendar]:
 
             spec.loader.exec_module(module)
 
-            resort_modules[module.__name__[:-3]] = module
+            if module.__name__ == "template":
+                continue
 
-    return {v.resort_name: v.main() for v in resort_modules.values()}
+            for name, cls in module.__dict__.items():
+                if (
+                    isinstance(cls, type)
+                    and cls != Template
+                    and issubclass(cls, Template)
+                ):
+                    implementations[name] = cls()
+
+    return {v.name: v.parse_data(v.make_request()) for v in implementations.values()}
 
 
 if __name__ == "__main__":
-    resorts = load_resorts()
+    data = load_data()
 
     # Insert resorts
-    for resort_name in resorts.keys():
-        resort_ref = database.resorts_collection.document(resort_name)
-        resort_ref.set({"name": resort_name}, merge=True)
+    for name in data.keys():
+        locations_ref = database.locations_collection.document(name)
+        locations_ref.set({"name": name}, merge=True)
 
     # Insert lift tickets
     batch = database.db.batch()
     batch_count = 0
     max_batch_size = 500  # Firestore batch limit
 
-    for calendar in resorts.values():
-        for ticket in calendar.dates:
-            # Create a unique ID for each ticket document
-            ticket_id = f"{ticket.resort_name}_{ticket.date.isoformat()}"
-            ticket_ref = database.tickets_collection.document(ticket_id)
+    for calendar in data.values():
+        for date in calendar.dates:
+            # Create a unique ID for each date document
+            date_id = f"{date.location_name}_{date.date.isoformat()}"
+            date_ref = database.prices_collection.document(date_id)
 
-            ticket_data = {
-                "resort_name": ticket.resort_name,
-                "date": ticket.date.isoformat(),  # Use datetime instead of date
-                "price": ticket.price,
+            date_data = {
+                "location_name": date.location_name,
+                "date": date.date.isoformat(),  # Use datetime instead of date
+                "price": date.price,
             }
 
-            batch.set(ticket_ref, ticket_data, merge=True)
+            batch.set(date_ref, date_data, merge=True)
             batch_count += 1
 
             # Commit batch when it reaches the limit

@@ -2,16 +2,16 @@ import datetime
 import pydantic
 
 
-class PydanticFromResort(pydantic.BaseModel):
-    resort_name: str
+class PydanticFromLocation(pydantic.BaseModel):
+    location_name: str
 
 
-class PydanticLiftTicket(PydanticFromResort, pydantic.BaseModel):
+class PydanticDatePrice(PydanticFromLocation, pydantic.BaseModel):
     model_config = pydantic.ConfigDict(from_attributes=True)
 
     date: datetime.date
     price: int
 
 
-class PydanticCalendar(PydanticFromResort, pydantic.BaseModel):
-    dates: list[PydanticLiftTicket]
+class PydanticCalendar(PydanticFromLocation, pydantic.BaseModel):
+    dates: list[PydanticDatePrice]

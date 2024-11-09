@@ -1,3 +1,4 @@
+import os
 import firebase_admin
 from firebase_admin import firestore as firebase_firestore
 from google.cloud import firestore
@@ -6,10 +7,15 @@ from google.cloud import firestore
 # will act on behalf of. If not supplied, the client falls back to the default
 # project inferred from the environment.
 
-app = firebase_admin.initialize_app(options={"database": "ski-ticket-prices"})
+database_id = os.getenv("FIRESTORE_DATABASE_ID")
 
-db = firestore.Client(database="ski-ticket-prices")
+if not database_id:
+    raise ValueError("FIRESTORE_DATABASE_ID is not set")
+
+app = firebase_admin.initialize_app()
+
+db = firestore.Client(database=database_id)
 
 # Collection references
-resorts_collection = db.collection("resorts")
-tickets_collection = db.collection("lift_tickets")
+locations_collection = db.collection("locations")
+prices_collection = db.collection("prices")
