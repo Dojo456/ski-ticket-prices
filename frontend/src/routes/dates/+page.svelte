@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Calendar from '$lib/components/Calendar.svelte';
-	import { fetchResorts, fetchPriceData } from '$lib/data';
+	import { fetchLocations, fetchPriceData } from '$lib/data';
 	import { db } from '$lib/firebase.svelte';
-	import type { PriceData, Resort } from '$lib/types';
+	import type { PriceData, Location } from '$lib/types';
 	import { onMount } from 'svelte';
 
 	let priceData = $state<PriceData[] | null>(null);
-	let resorts = $state<Resort[] | null>(null);
+	let resorts = $state<Location[] | null>(null);
 
 	onMount(() => {
 		db.subscribe(async (db) => {
 			if (db) {
 				fetchPriceData(db).then((data) => (priceData = data));
-				fetchResorts(db).then((data) => (resorts = data));
+				fetchLocations(db).then((data) => (resorts = data));
 			}
 		});
 	});
@@ -62,5 +62,5 @@
 		<button class="btn" onclick={nextMonth}> Next &rarr; </button>
 	</div>
 
-	<Calendar resorts={resorts ?? []} prices={priceData ?? []} {anchorDate} {startDate} {endDate} />
+	<Calendar locations={resorts ?? []} prices={priceData ?? []} {anchorDate} {startDate} {endDate} />
 </main>

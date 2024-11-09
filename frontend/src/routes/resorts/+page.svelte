@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { fetchResorts, fetchPriceData } from '$lib/data';
+	import { fetchLocations, fetchPriceData } from '$lib/data';
 	import { db } from '$lib/firebase.svelte';
-	import type { PriceData, Resort } from '$lib/types';
+	import type { PriceData, Location } from '$lib/types';
 	import { onMount } from 'svelte';
 
 	let priceData = $state<PriceData[] | null>(null);
-	let resorts = $state<Resort[] | null>(null);
+	let resorts = $state<Location[] | null>(null);
 
 	onMount(() => {
 		db.subscribe(async (db) => {
 			if (db) {
 				priceData = await fetchPriceData(db);
-				resorts = await fetchResorts(db);
+				resorts = await fetchLocations(db);
 			}
 		});
 	});
@@ -19,7 +19,7 @@
 	function getAveragePrice(resortName: string) {
 		if (!priceData) return 0;
 
-		const resortPrices = priceData.filter((p) => p.resortName === resortName);
+		const resortPrices = priceData.filter((p) => p.locationName === resortName);
 		const total = resortPrices.reduce((sum, p) => sum + p.price, 0);
 		return Math.round(total / resortPrices.length);
 	}

@@ -1,13 +1,11 @@
-interface Resort {
+interface Location {
 	name: string;
-	location: string;
-	logo?: string;
 }
 
 interface PriceData {
 	date: string;
 	price: number;
-	resortName: string;
+	locationName: string;
 }
 
-export type { Resort, PriceData };
+export type { Location, PriceData };

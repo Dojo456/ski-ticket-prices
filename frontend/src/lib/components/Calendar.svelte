@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { PriceData, Resort } from '$lib/types';
+	import type { PriceData, Location } from '$lib/types';
 
 	interface Props {
 		prices: PriceData[];
-		resorts: Resort[];
+		locations: Location[];
 		anchorDate: Date;
 		startDate?: Date;
 		endDate?: Date;
 	}
 
-	const { prices, resorts, startDate, endDate, anchorDate }: Props = $props();
+	const { prices, locations, startDate, endDate, anchorDate }: Props = $props();
 
 	const today = new Date();
 
@@ -48,7 +48,7 @@
 	$inspect(startDate);
 	$inspect(endDate);
 
-	function getCheapestResortForDate(date: Date) {
+	function getCheapestLocationForDate(date: Date) {
 		const pricesForDate = prices
 			.filter((p) => {
 				return p.date === date.toISOString().split('T')[0];
@@ -58,10 +58,10 @@
 		if (pricesForDate.length === 0) return null;
 
 		const cheapestPrice = pricesForDate[0];
-		const resort = resorts.find((r) => r.name === cheapestPrice.resortName);
+		const location = locations.find((l) => l.name === cheapestPrice.locationName);
 
 		return {
-			resort,
+			location,
 			price: cheapestPrice.price
 		};
 	}
@@ -84,7 +84,7 @@
 			{#each weeks as week}
 				<tr>
 					{#each week as date}
-						{@const cheapestData = getCheapestResortForDate(date)}
+						{@const cheapestData = getCheapestLocationForDate(date)}
 						{@const isCurrentDate = date.toDateString() === today.toDateString()}
 						{@const withinRange =
 							startDate && endDate ? date >= startDate && date <= endDate : false}
@@ -119,7 +119,7 @@
 												{formatPrice(cheapestData.price, 'USD')}
 											</span>
 											<span class="truncate text-sm font-medium text-gray-700">
-												{cheapestData.resort?.name}
+												{cheapestData.location?.name}
 											</span>
 										</div>
 									{:else}

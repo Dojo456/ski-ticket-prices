@@ -2,9 +2,9 @@
 	import { page } from '$app/stores';
 	import Calendar from '$lib/components/Calendar.svelte';
 	import SearchBar from '$lib/components/SearchBar.svelte';
-	import { fetchResorts, fetchPriceData } from '$lib/data';
+	import { fetchLocations, fetchPriceData } from '$lib/data';
 	import { db } from '$lib/firebase.svelte';
-	import type { PriceData, Resort } from '$lib/types';
+	import type { PriceData, Location } from '$lib/types';
 	import { parseDateIgnoreTZ } from '$lib/utils';
 	import { onMount } from 'svelte';
 
@@ -14,7 +14,7 @@
 	const locationParam = $page.url.searchParams.get('location');
 
 	let priceData = $state<PriceData[] | null>(null);
-	let resorts = $state<Resort[] | null>(null);
+	let locations = $state<Location[] | null>(null);
 
 	// Parse dates
 	const startDate = startDateParam ? parseDateIgnoreTZ(startDateParam) : new Date();
@@ -29,7 +29,7 @@
 		db.subscribe(async (db) => {
 			if (db) {
 				priceData = await fetchPriceData(db);
-				resorts = await fetchResorts(db);
+				locations = await fetchLocations(db);
 			}
 		});
 	});
@@ -40,8 +40,8 @@
 		<div class="w-1/4">
 			<SearchBar defaultStartDate={startDate} defaultEndDate={endDate} defaultLocation={location} />
 		</div>
-		{#if priceData && resorts}
-			<Calendar prices={priceData} {resorts} {anchorDate} {startDate} {endDate} />
+		{#if priceData && locations}
+			<Calendar prices={priceData} {locations} {anchorDate} {startDate} {endDate} />
 		{:else}
 			<div class="flex h-64 items-center justify-center">
 				<div class="text-lg text-gray-600">Loading...</div>

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { fetchResorts, fetchPriceData } from '$lib/data';
+	import { fetchLocations, fetchPriceData } from '$lib/data';
 	import { db } from '$lib/firebase.svelte';
-	import type { PriceData, Resort } from '$lib/types';
+	import type { PriceData, Location } from '$lib/types';
 	import { onMount } from 'svelte';
 
 	const date = $page.params.date;
@@ -69,7 +69,7 @@
 					<tbody class="divide-y divide-gray-200 bg-white">
 						{#each priceData as price}
 							<tr>
-								<td class="whitespace-nowrap px-6 py-4">{price.resortName}</td>
+								<td class="whitespace-nowrap px-6 py-4">{price.locationName}</td>
 								<td class="whitespace-nowrap px-6 py-4">{formatPrice(price.price, 'USD')}</td>
 							</tr>
 						{/each}

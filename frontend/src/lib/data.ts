@@ -1,25 +1,23 @@
-import type { Resort, PriceData } from './types';
+import type { Location, PriceData } from './types';
 import { collection, getDocs, query, orderBy, Firestore, where } from 'firebase/firestore';
 
-export async function fetchResorts(db: Firestore): Promise<Resort[]> {
-	const resortsRef = collection(db, 'resorts');
-	const querySnapshot = await getDocs(resortsRef);
+export async function fetchLocations(db: Firestore): Promise<Location[]> {
+	const locationsRef = collection(db, 'locations');
+	const querySnapshot = await getDocs(locationsRef);
 
-	const resorts: Resort[] = [];
+	const locations: Location[] = [];
 	querySnapshot.forEach((doc) => {
 		const data = doc.data();
-		resorts.push({
-			name: data.name,
-			location: data.location,
-			logo: data.logo
+		locations.push({
+			name: data.name
 		});
 	});
 
-	return resorts;
+	return locations;
 }
 
 export async function fetchPriceData(db: Firestore, date?: string): Promise<PriceData[]> {
-	const pricesRef = collection(db, 'lift_tickets');
+	const pricesRef = collection(db, 'prices');
 
 	let q;
 	if (date) {
@@ -33,7 +31,7 @@ export async function fetchPriceData(db: Firestore, date?: string): Promise<Pric
 	querySnapshot.forEach((doc) => {
 		const data = doc.data();
 		prices.push({
-			resortName: data.resort_name,
+			locationName: data.location_name,
 			date: data.date,
 			price: data.price
 		});
